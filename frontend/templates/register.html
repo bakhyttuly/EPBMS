@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="auth-body">
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>EPBMS</h1>
+        <h2>Create platform account</h2>
+        <form id="register-form">
+            <input type="text" id="full_name" placeholder="Full Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <select id="role" required style="min-height:50px;border-radius:16px;padding:0 16px;background:rgba(255,255,255,0.04);color:white;border:1px solid rgba(255,255,255,0.07);">
+                <option value="organizer">Organizer</option>
+                <option value="performer">Performer</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button type="submit">Register</button>
+        </form>
+        <p><a href="/">Back to login</a></p>
+    </div>
+</div>
+<script src="/static/js/register.js"></script>
+<script src="/static/js/navbar.js"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <h2>EPBMS</h2>
+        <nav>
+            <a href="/dashboard-page" class="active">Dashboard</a>
+            <a href="/performers-page">Performers</a>
+            <a href="/bookings-page">Bookings</a>
+            <a href="/calendar-page">Calendar</a>
+            <a href="/">Logout</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <div class="page-header">
+            <div>
+                <h1>Dashboard</h1>
+                <p class="page-subtitle">Premium control panel for your event booking workflow</p>
+            </div>
+        </div>
+
+        <div class="hero-bar">
+            <div>
+                <h3>Event Performer & Booking Management System</h3>
+                <p>Track performers, bookings, conflicts, and schedules from one modern dashboard.</p>
+            </div>
+            <div class="hero-pill">Live overview</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="card">
+                <div class="metric-icon"></div>
+                <h3>Total Bookings</h3>
+                <p id="total-bookings">0</p>
+            </div>
+            <div class="card">
+                <div class="metric-icon"></div>
+                <h3>Active Bookings</h3>
+                <p id="active-bookings">0</p>
+            </div>
+            <div class="card">
+                <div class="metric-icon"></div>
+                <h3>Completed Bookings</h3>
+                <p id="completed-bookings">0</p>
+            </div>
+            <div class="card">
+                <div class="metric-icon"></div>
+                <h3>Performers Count</h3>
+                <p id="performers-count">0</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/static/js/dashboard.js"></script>
+<script src="/static/js/navbar.js"></script>
+<script src="/static/js/guard.js"></script>
+<script>
+    guardPage(["admin", "organizer"]);
+</script>
+</body>
+</html>

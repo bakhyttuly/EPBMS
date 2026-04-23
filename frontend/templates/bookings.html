@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <h2>EPBMS</h2>
+        <nav>
+            <a href="/dashboard-page">Dashboard</a>
+            <a href="/performers-page">Performers</a>
+            <a href="/bookings-page" class="active">Bookings</a>
+            <a href="/calendar-page">Calendar</a>
+            <a href="/">Logout</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <div class="page-header">
+            <div>
+                <h1>Bookings</h1>
+                <p class="page-subtitle">Create reservations and track booking activity with conflict protection</p>
+            </div>
+        </div>
+
+        <div class="hero-bar">
+            <div>
+                <h3>Reservation center</h3>
+                <p>Book performers by date and time while preventing overlapping schedules.</p>
+            </div>
+            <div class="hero-pill">Smart booking</div>
+        </div>
+
+        <div class="card form-card">
+            <h3>Create Booking</h3>
+            <form id="booking-form">
+                <select id="performer_id" required></select>
+                <input type="text" id="client_name" placeholder="Client Name" required>
+                <input type="date" id="event_date" required>
+                <input type="time" id="start_time" required>
+                <input type="time" id="end_time" required>
+                <input type="text" id="status" placeholder="Status" required>
+                <button type="submit">Create Booking</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Bookings List</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Performer</th>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="bookings-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/static/js/bookings.js"></script>
+<script src="/static/js/navbar.js"></script>
+<script src="/static/js/guard.js"></script>
+<script>
+    guardPage(["admin", "organizer"]);
+</script>
+</body>
+</html>

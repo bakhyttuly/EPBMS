@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <h2>EPBMS</h2>
+        <nav>
+            <a href="/dashboard-page">Dashboard</a>
+            <a href="/performers-page" class="active">Performers</a>
+            <a href="/bookings-page">Bookings</a>
+            <a href="/calendar-page">Calendar</a>
+            <a href="/">Logout</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <div class="page-header">
+            <div>
+                <h1>Performers</h1>
+                <p class="page-subtitle">Manage hosts, singers, DJs, bands, and event entertainers</p>
+            </div>
+        </div>
+
+        <div class="hero-bar">
+            <div>
+                <h3>Performer management</h3>
+                <p>Add new performers and keep their category, price, and availability organized.</p>
+            </div>
+            <div class="hero-pill">Talent hub</div>
+        </div>
+
+        <div class="card form-card">
+            <h3>Add Performer</h3>
+            <form id="performer-form">
+                <input type="text" id="name" placeholder="Name" required>
+                <input type="text" id="category" placeholder="Category" required>
+                <input type="number" id="price" placeholder="Price" required>
+                <input type="text" id="description" placeholder="Description">
+                <input type="text" id="availability_status" placeholder="Availability Status">
+                <button type="submit">Add Performer</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Performers List</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="performers-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/static/js/performers.js"></script>
+<script src="/static/js/navbar.js"></script>
+<script src="/static/js/guard.js"></script>
+<script>
+    guardPage(["admin"]);
+</script>
+</body>
+</html>

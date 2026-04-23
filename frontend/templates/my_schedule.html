@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <h2>EPBMS</h2>
+        <nav>
+            <a href="/dashboard-page">Dashboard</a>
+            <a href="/my-schedule-page" class="active">My Schedule</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <div class="page-header">
+            <div>
+                <h1>My Schedule</h1>
+                <p class="page-subtitle">Performer personal schedule page</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>My bookings</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody id="my-schedule-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/static/js/my_schedule.js"></script>
+<script src="/static/js/guard.js"></script>
+<script>
+    guardPage(["performer"]);
+</script>
+<script src="/static/js/navbar.js"></script>
+</body>
+</html>

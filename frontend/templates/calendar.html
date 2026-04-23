@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <h2>EPBMS</h2>
+        <nav>
+            <a href="/dashboard-page">Dashboard</a>
+            <a href="/performers-page">Performers</a>
+            <a href="/bookings-page">Bookings</a>
+            <a href="/calendar-page" class="active">Calendar</a>
+            <a href="/">Logout</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <div class="page-header">
+            <div>
+                <h1>Calendar</h1>
+                <p class="page-subtitle">View bookings by date and monitor scheduled event activity</p>
+            </div>
+        </div>
+
+        <div class="hero-bar">
+            <div>
+                <h3>Schedule board</h3>
+                <p>Filter daily reservations and review the timeline of performer activity.</p>
+            </div>
+            <div class="hero-pill">Calendar view</div>
+        </div>
+
+        <div class="card form-card">
+            <h3>Filter Bookings by Date</h3>
+            <form id="calendar-form">
+                <input type="date" id="calendar-date" required>
+                <button type="submit">Load Bookings</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Schedule</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Performer</th>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody id="calendar-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/static/js/calendar.js"></script>
+<script src="/static/js/navbar.js"></script>
+</body>
+</html>
