@@ -1,46 +1,70 @@
 package routes
 
 import (
-	"epbms/handlers"
-	"epbms/middleware"
-
+	"epbms/internal/domain"
+	"epbms/internal/handler"
+	"epbms/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine) {
-	r.GET("/", handlers.ShowLoginPage)
-	r.GET("/register", handlers.ShowRegisterPage)
+// SetupRoutes registers all API routes with their respective handlers and middleware.
+func SetupRoutes(
+	r *gin.Engine,
+	authH *handler.AuthHandler,
+	performerH *handler.PerformerHandler,
+	bookingH *handler.BookingHandler,
+	adminH *handler.AdminHandler,
+) {
+	api := r.Group("/api/v1")
 
-	r.POST("/auth/register", handlers.Register)
-	r.POST("/auth/login", handlers.Login)
-	r.GET("/logout", handlers.Logout)
-
-	protected := r.Group("/")
-	protected.Use(middleware.AuthRequired())
+	// --- Public routes (no auth required) ---
+	auth := api.Group("/auth")
 	{
-		protected.GET("/me", handlers.GetCurrentUser)
+		auth.POST("/register", authH.Register)
+		auth.POST("/login", authH.Login)
+	}
 
-		protected.GET("/dashboard-page", middleware.RoleRequired("admin", "organizer"), handlers.ShowDashboardPage)
-		protected.GET("/performers-page", middleware.RoleRequired("admin"), handlers.ShowPerformersPage)
-		protected.GET("/bookings-page", middleware.RoleRequired("admin", "organizer"), handlers.ShowBookingsPage)
-		protected.GET("/calendar-page", middleware.RoleRequired("admin", "organizer"), handlers.ShowCalendarPage)
-		protected.GET("/my-schedule-page", middleware.RoleRequired("performer"), handlers.ShowMySchedulePage)
+	// --- Protected routes (JWT required) ---
+	protected := api.Group("/")
+	protected.Use(middleware.JWTAuth())
+	{
+		// Performers — readable by all authenticated users; writable by admin
+		performers := protected.Group("/performers")
+		{
+			performers.GET("", performerH.GetAll)
+			performers.GET("/:id", performerH.GetByID)
+			performers.POST("",
+				middleware.RequireRoles(domain.RoleAdmin),
+				performerH.Create,
+			)
+			performers.PUT("/:id",
+				middleware.RequireRoles(domain.RoleAdmin, domain.RolePerformer),
+				performerH.Update,
+			)
+			performers.DELETE("/:id",
+				middleware.RequireRoles(domain.RoleAdmin),
+				performerH.Delete,
+			)
+		}
 
-		protected.GET("/dashboard/stats", handlers.GetDashboardStats)
+		// Bookings — role-scoped visibility enforced in the service layer
+		bookings := protected.Group("/bookings")
+		{
+			bookings.GET("", bookingH.GetAll)
+			bookings.GET("/:id", bookingH.GetByID)
+			bookings.POST("",
+				middleware.RequireRoles(domain.RoleClient),
+				bookingH.Create,
+			)
+		}
 
-		protected.GET("/performers", handlers.GetPerformers)
-		protected.GET("/performers/:id", handlers.GetPerformerByID)
-		protected.POST("/performers", handlers.CreatePerformer)
-		protected.PUT("/performers/:id", handlers.UpdatePerformer)
-		protected.DELETE("/performers/:id", handlers.DeletePerformer)
-
-		protected.GET("/bookings", handlers.GetBookings)
-		protected.GET("/bookings/:id", handlers.GetBookingByID)
-		protected.GET("/bookings/by-date", handlers.GetBookingsByDate)
-		protected.POST("/bookings", handlers.CreateBooking)
-		protected.PUT("/bookings/:id", handlers.UpdateBooking)
-		protected.DELETE("/bookings/:id", handlers.DeleteBooking)
-
-		protected.GET("/performers/:id/schedule", handlers.GetPerformerSchedule)
+		// Admin-only routes
+		admin := protected.Group("/admin")
+		admin.Use(middleware.RequireRoles(domain.RoleAdmin))
+		{
+			admin.GET("/stats", adminH.GetStats)
+			admin.PUT("/bookings/:id/status", bookingH.UpdateStatus)
+			admin.DELETE("/bookings/:id", bookingH.Delete)
+		}
 	}
 }
