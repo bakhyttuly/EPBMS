@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"epbms/config"
 	"epbms/internal/handler"
@@ -16,10 +17,8 @@ import (
 )
 
 func main() {
-	// Initialise structured logger.
 	appLog := logger.New()
 
-	// Connect to the database and run migrations.
 	db, err := config.NewDatabase()
 	if err != nil {
 		log.Fatalf("database initialisation failed: %v", err)
@@ -40,6 +39,7 @@ func main() {
 	performerH := handler.NewPerformerHandler(performerSvc)
 	bookingH := handler.NewBookingHandler(bookingSvc)
 	adminH := handler.NewAdminHandler(userRepo, bookingRepo, performerRepo)
+	pageH := handler.NewPageHandler()
 
 	// --- HTTP server ---
 	if os.Getenv("APP_ENV") == "production" {
@@ -49,9 +49,13 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(appMiddleware.RequestLogger(appLog))
-	r.Use(appMiddleware.RateLimiter(10, 30)) // 10 req/s, burst of 30
+	r.Use(appMiddleware.RateLimiter(10, 30))
 
-	routes.SetupRoutes(r, authH, performerH, bookingH, adminH)
+	// Load HTML templates
+	templatesPath := filepath.Join("..", "frontend", "templates", "*")
+	r.LoadHTMLGlob(templatesPath)
+
+	routes.SetupRoutes(r, authH, performerH, bookingH, adminH, pageH)
 
 	port := os.Getenv("PORT")
 	if port == "" {

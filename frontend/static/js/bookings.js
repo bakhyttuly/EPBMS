@@ -1,121 +1,91 @@
-async function loadPerformerDropdown() {
-    const response = await fetch("/performers");
-    const performers = await response.json();
-
-    const select = document.getElementById("performer_id");
-    select.innerHTML = "";
-
-    performers.forEach(p => {
-        const option = document.createElement("option");
-        option.value = p.id;
-        option.textContent = `${p.name} (${p.category})`;
-        select.appendChild(option);
-    });
-}
-function getBookingBadge(status) {
-    const value = (status || "").toLowerCase();
-    let badgeClass = "default";
-
-    if (value === "active") badgeClass = "active";
-    if (value === "completed") badgeClass = "completed";
-
-    return `<span class="badge ${badgeClass}">${status || "unknown"}</span>`;
-}
-
-async function loadCurrentUser() {
-    const response = await fetch("/me");
-    if (!response.ok) return null;
-    return await response.json();
-}
-
 async function loadBookings() {
-    const currentUser = await loadCurrentUser();
-    const response = await fetch("/bookings");
-    const bookings = await response.json();
+    try {
+        const response = await authenticatedFetch("/api/v1/bookings");
+        if (!response) return;
 
-    const tableBody = document.getElementById("bookings-table-body");
-    tableBody.innerHTML = "";
+        const result = await response.json();
+        const bookings = result.data;
 
-    if (!Array.isArray(bookings) || bookings.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="8">
-                    <div class="empty-state">No bookings yet</div>
+        const tableBody = document.getElementById("bookings-table-body");
+        if (!tableBody) return;
+        
+        tableBody.innerHTML = "";
+
+        if (!Array.isArray(bookings) || bookings.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No bookings found</div></td></tr>`;
+            return;
+        }
+
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+        bookings.forEach(booking => {
+            const row = document.createElement("tr");
+
+            let actions = "";
+            if (user.role === "admin" && booking.status === "pending") {
+                actions = `
+                    <button onclick="updateStatus(${booking.id}, 'confirmed')" class="success-btn">Approve</button>
+                    <button onclick="updateStatus(${booking.id}, 'rejected')" class="danger-btn">Reject</button>
+                `;
+            } else if (user.role === "admin" && booking.status === "confirmed") {
+                actions = `<button onclick="updateStatus(${booking.id}, 'completed')" class="primary-btn">Complete</button>`;
+            } else if (user.role === "admin") {
+                actions = `<button onclick="deleteBooking(${booking.id})" class="danger-btn">Delete</button>`;
+            }
+
+            row.innerHTML = `
+                <td>${booking.id}</td>
+                <td>${booking.performer ? booking.performer.name : 'N/A'}</td>
+                <td>${booking.event_date}</td>
+                <td>${booking.start_time} - ${booking.end_time}</td>
+                <td><span class="badge ${booking.status}">${booking.status}</span></td>
+                <td>${booking.notes || ""}</td>
+                <td>
+                    <div class="action-group">
+                        ${actions}
+                    </div>
                 </td>
-            </tr>
-        `;
-        return;
+            `;
+
+            tableBody.appendChild(row);
+        });
+    } catch (error) {
+        console.error("Error loading bookings:", error);
     }
+}
 
-    bookings.forEach(booking => {
-        const performerName = booking.performer ? booking.performer.name : booking.performer_id;
+async function updateStatus(id, status) {
+    try {
+        const response = await authenticatedFetch(`/api/v1/admin/bookings/${id}/status`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status })
+        });
 
-        const canDelete = currentUser && currentUser.role !== "performer";
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${booking.id}</td>
-            <td>${performerName}</td>
-            <td>${booking.client_name}</td>
-            <td>${booking.event_date}</td>
-            <td>${booking.start_time}</td>
-            <td>${booking.end_time}</td>
-            <td>${getBookingBadge(booking.status)}</td>
-            <td>
-                <div class="action-group">
-                    ${canDelete ? `<button onclick="deleteBooking(${booking.id})" class="danger-btn">Delete</button>` : ``}
-                </div>
-            </td>
-        `;
-
-        tableBody.appendChild(row);
-    });
+        if (response && response.ok) {
+            loadBookings();
+        } else {
+            const result = await response.json();
+            alert("Failed to update status: " + (result.error || "Unknown error"));
+        }
+    } catch (error) {
+        console.error("Error updating status:", error);
+    }
 }
 
 async function deleteBooking(id) {
     if (!confirm("Delete this booking?")) return;
 
-    const response = await fetch(`/bookings/${id}`, {
+    const response = await authenticatedFetch(`/api/v1/admin/bookings/${id}`, {
         method: "DELETE"
     });
 
-    if (response.ok) {
+    if (response && response.ok) {
         loadBookings();
     } else {
-        const data = await response.json();
-        alert(data.error || "Failed to delete booking");
+        const result = await response.json();
+        alert("Failed to delete booking: " + (result.error || "Unknown error"));
     }
 }
 
-document.getElementById("booking-form").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const booking = {
-        performer_id: parseInt(document.getElementById("performer_id").value),
-        client_name: document.getElementById("client_name").value,
-        event_date: document.getElementById("event_date").value,
-        start_time: document.getElementById("start_time").value,
-        end_time: document.getElementById("end_time").value,
-        status: document.getElementById("status").value
-    };
-
-    const response = await fetch("/bookings", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(booking)
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-        document.getElementById("booking-form").reset();
-        loadBookings();
-    } else {
-        alert(data.error || "Failed to create booking");
-    }
-});
-
 loadBookings();
-loadPerformerDropdown();
